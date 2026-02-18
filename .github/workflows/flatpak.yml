@@ -10,6 +10,8 @@ jobs:
   flatpak:
     name: Flatpak
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     container:
       image: bilelmoussaoui/flatpak-github-actions:gnome-46
