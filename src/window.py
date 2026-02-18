@@ -12,6 +12,8 @@ SECRET_SCHEMA = Secret.Schema.new(
     {"email": Secret.SchemaAttributeType.STRING},
 )
 
+SETTINGS_SCHEMA = "org.dynodevv.chessboard"
+
 
 class ChessboardWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
@@ -20,6 +22,7 @@ class ChessboardWindow(Adw.ApplicationWindow):
         self.set_title("Chessboard")
 
         self._process_manager = ProcessManager(self._on_process_died)
+        self._settings = Gio.Settings.new(SETTINGS_SCHEMA)
         self._email = None
 
         self._build_ui()
@@ -146,19 +149,25 @@ class ChessboardWindow(Adw.ApplicationWindow):
             password,
             None,
         )
+        self._settings.set_string("last-email", email)
 
     def _lookup_credentials(self):
+        email = self._settings.get_string("last-email")
+        if not email:
+            return None
         password = Secret.password_lookup_sync(
-            SECRET_SCHEMA, {"email": "stored"}, None
+            SECRET_SCHEMA, {"email": email}, None
         )
         if password:
-            return ("stored", password)
+            return (email, password)
         return None
 
     def _clear_credentials(self):
-        Secret.password_clear_sync(
-            SECRET_SCHEMA, {"email": self._email or "stored"}, None
-        )
+        if self._email:
+            Secret.password_clear_sync(
+                SECRET_SCHEMA, {"email": self._email}, None
+            )
+        self._settings.set_string("last-email", "")
 
     # --- Auto-login ---
 
@@ -178,7 +187,7 @@ class ChessboardWindow(Adw.ApplicationWindow):
             return
 
         self._email = email
-        self._store_credentials("stored", password)
+        self._store_credentials(email, password)
         self._email_row.set_text("")
         self._password_row.set_text("")
         self._view_stack.set_visible_child_name("home")

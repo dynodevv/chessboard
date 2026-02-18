@@ -13,5 +13,9 @@
       <default>false</default>
       <summary>Window maximized state</summary>
     </key>
+    <key name="last-email" type="s">
+      <default>''</default>
+      <summary>Last signed-in email address</summary>
+    </key>
   </schema>
 </schemalist>
