@@ -1,9 +1,13 @@
+import os
+import shutil
 import subprocess
 import signal
 
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import GLib
+
+PAWNS_CLI_DEFAULT = "./pawns-cli"
 
 
 class ProcessManager:
@@ -12,12 +16,23 @@ class ProcessManager:
         self._monitor_id = None
         self._on_died = on_died_callback
 
+    @staticmethod
+    def _find_pawns_cli():
+        env_path = os.environ.get("PAWNS_CLI_PATH")
+        if env_path and os.path.isfile(env_path):
+            return env_path
+        found = shutil.which("pawns-cli")
+        if found:
+            return found
+        return PAWNS_CLI_DEFAULT
+
     def start(self, email, password):
         if self.is_running():
             return
 
+        cli = self._find_pawns_cli()
         cmd = [
-            "./pawns-cli",
+            cli,
             f"-email={email}",
             f"-password={password}",
             "-device-name=Chessboard-Linux",
