@@ -44,7 +44,7 @@ class ProcessManager:
         stderr_target = subprocess.DEVNULL
         if log_file:
             try:
-                self._log_fh = open(log_file, "w")
+                self._log_fh = open(log_file, "w", encoding="utf-8")
                 stdout_target = self._log_fh
                 stderr_target = self._log_fh
             except OSError:
