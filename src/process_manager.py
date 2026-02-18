@@ -15,6 +15,7 @@ class ProcessManager:
         self._process = None
         self._monitor_id = None
         self._on_died = on_died_callback
+        self._log_fh = None
 
     @staticmethod
     def _find_pawns_cli():
@@ -26,9 +27,9 @@ class ProcessManager:
             return found
         return PAWNS_CLI_DEFAULT
 
-    def start(self, email, password):
+    def start(self, email, password, log_file=None):
         if self.is_running():
-            return
+            return True
 
         cli = self._find_pawns_cli()
         cmd = [
@@ -39,18 +40,28 @@ class ProcessManager:
             "-accept-tos",
         ]
 
+        stdout_target = subprocess.DEVNULL
+        stderr_target = subprocess.DEVNULL
+        if log_file:
+            try:
+                self._log_fh = open(log_file, "w")
+                stdout_target = self._log_fh
+                stderr_target = self._log_fh
+            except OSError:
+                pass
+
         try:
             self._process = subprocess.Popen(
                 cmd,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdout=stdout_target,
+                stderr=stderr_target,
             )
         except FileNotFoundError:
-            if self._on_died:
-                self._on_died()
-            return
+            self._close_log()
+            return False
 
         self._monitor_id = GLib.timeout_add_seconds(5, self._check_process)
+        return True
 
     def stop(self):
         if self._monitor_id is not None:
@@ -65,14 +76,24 @@ class ProcessManager:
                 self._process.kill()
 
         self._process = None
+        self._close_log()
 
     def is_running(self):
         return self._process is not None and self._process.poll() is None
+
+    def _close_log(self):
+        if self._log_fh:
+            try:
+                self._log_fh.close()
+            except OSError:
+                pass
+            self._log_fh = None
 
     def _check_process(self):
         if self._process and self._process.poll() is not None:
             self._process = None
             self._monitor_id = None
+            self._close_log()
             if self._on_died:
                 self._on_died()
             return GLib.SOURCE_REMOVE

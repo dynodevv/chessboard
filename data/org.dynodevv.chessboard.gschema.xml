@@ -17,5 +17,9 @@
       <default>''</default>
       <summary>Last signed-in email address</summary>
     </key>
+    <key name="logging-enabled" type="b">
+      <default>false</default>
+      <summary>Enable logging of pawns-cli output</summary>
+    </key>
   </schema>
 </schemalist>

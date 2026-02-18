@@ -1,8 +1,11 @@
+import os
+from datetime import datetime
+
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 gi.require_version('Secret', '1')
-from gi.repository import Gtk, Adw, Gio, Secret
+from gi.repository import Gtk, Adw, Gio, GLib, Secret
 
 from process_manager import ProcessManager
 
@@ -55,6 +58,16 @@ class ChessboardWindow(Adw.ApplicationWindow):
         sign_in_button.set_margin_top(24)
         sign_in_button.connect("clicked", self._on_sign_in)
 
+        twofa_label = Gtk.Label(
+            label="2FA is not supported by the Pawns.app CLI.\n"
+                  "Please disable it in your account to use Chessboard.",
+        )
+        twofa_label.add_css_class("dim-label")
+        twofa_label.add_css_class("caption")
+        twofa_label.set_wrap(True)
+        twofa_label.set_justify(Gtk.Justification.CENTER)
+        twofa_label.set_margin_top(8)
+
         login_group = Adw.PreferencesGroup()
         login_group.add(self._email_row)
         login_group.add(self._password_row)
@@ -64,6 +77,7 @@ class ChessboardWindow(Adw.ApplicationWindow):
         login_box.set_margin_end(24)
         login_box.append(login_group)
         login_box.append(sign_in_button)
+        login_box.append(twofa_label)
 
         login_clamp = Adw.Clamp()
         login_clamp.set_maximum_size(360)
@@ -82,12 +96,12 @@ class ChessboardWindow(Adw.ApplicationWindow):
         self._sharing_switch.set_valign(Gtk.Align.CENTER)
         self._sharing_switch.connect("state-set", self._on_sharing_toggled)
 
-        sharing_row = Adw.ActionRow(
+        self._sharing_row = Adw.ActionRow(
             title="Internet Sharing",
-            subtitle="Toggle to start/stop sharing",
+            subtitle="Inactive",
         )
-        sharing_row.add_suffix(self._sharing_switch)
-        sharing_row.set_activatable_widget(self._sharing_switch)
+        self._sharing_row.add_suffix(self._sharing_switch)
+        self._sharing_row.set_activatable_widget(self._sharing_switch)
 
         dashboard_row = Adw.ActionRow(
             title="Open Dashboard",
@@ -100,9 +114,40 @@ class ChessboardWindow(Adw.ApplicationWindow):
         dashboard_row.connect("activated", self._on_open_dashboard)
 
         home_group = Adw.PreferencesGroup()
-        home_group.add(sharing_row)
+        home_group.add(self._sharing_row)
         home_group.add(dashboard_row)
 
+        # --- Settings group ---
+        self._logging_switch = Gtk.Switch()
+        self._logging_switch.set_valign(Gtk.Align.CENTER)
+        self._settings.bind(
+            "logging-enabled",
+            self._logging_switch,
+            "active",
+            Gio.SettingsBindFlags.DEFAULT,
+        )
+
+        logging_row = Adw.ActionRow(
+            title="Enable Logging",
+            subtitle="Save pawns-cli output to log files",
+        )
+        logging_row.add_suffix(self._logging_switch)
+        logging_row.set_activatable_widget(self._logging_switch)
+
+        open_logs_row = Adw.ActionRow(
+            title="Open Logs Folder",
+            activatable=True,
+        )
+        open_logs_row.add_suffix(
+            Gtk.Image.new_from_icon_name("folder-open-symbolic")
+        )
+        open_logs_row.connect("activated", self._on_open_logs)
+
+        settings_group = Adw.PreferencesGroup(title="Settings")
+        settings_group.add(logging_row)
+        settings_group.add(open_logs_row)
+
+        # --- Account group ---
         sign_out_row = Adw.ActionRow(
             title="Sign Out",
             activatable=True,
@@ -117,6 +162,7 @@ class ChessboardWindow(Adw.ApplicationWindow):
         home_box.set_margin_start(24)
         home_box.set_margin_end(24)
         home_box.append(home_group)
+        home_box.append(settings_group)
         home_box.append(account_group)
 
         home_clamp = Adw.Clamp()
@@ -169,6 +215,26 @@ class ChessboardWindow(Adw.ApplicationWindow):
             )
         self._settings.set_string("last-email", "")
 
+    # --- Log helpers ---
+
+    def _get_log_dir(self):
+        log_dir = os.path.join(GLib.get_user_data_dir(), "chessboard", "logs")
+        os.makedirs(log_dir, exist_ok=True)
+        return log_dir
+
+    def _get_log_file_path(self):
+        log_dir = self._get_log_dir()
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        return os.path.join(log_dir, f"pawns-cli-{timestamp}.log")
+
+    # --- Status helpers ---
+
+    def _update_sharing_status(self, active):
+        if active:
+            self._sharing_row.set_subtitle("Active")
+        else:
+            self._sharing_row.set_subtitle("Inactive")
+
     # --- Auto-login ---
 
     def _try_auto_login(self):
@@ -190,26 +256,50 @@ class ChessboardWindow(Adw.ApplicationWindow):
         self._store_credentials(email, password)
         self._email_row.set_text("")
         self._password_row.set_text("")
+
         self._view_stack.set_visible_child_name("home")
 
     def _on_sharing_toggled(self, switch, state):
         if state:
             creds = self._lookup_credentials()
             if creds:
-                self._process_manager.start(self._email, creds[1])
+                log_path = None
+                if self._settings.get_boolean("logging-enabled"):
+                    log_path = self._get_log_file_path()
+                success = self._process_manager.start(
+                    creds[0], creds[1], log_file=log_path
+                )
+                if success:
+                    switch.set_state(True)
+                    self._update_sharing_status(True)
+                else:
+                    switch.set_active(False)
+                    self._update_sharing_status(False)
+            else:
+                switch.set_active(False)
         else:
             self._process_manager.stop()
-        return False
+            switch.set_state(False)
+            self._update_sharing_status(False)
+        return True
 
     def _on_process_died(self):
         self._sharing_switch.set_active(False)
+        self._sharing_switch.set_state(False)
+        self._update_sharing_status(False)
 
     def _on_open_dashboard(self, row):
         Gtk.show_uri(self, "https://dashboard.pawns.app", 0)
 
+    def _on_open_logs(self, row):
+        log_dir = self._get_log_dir()
+        Gtk.show_uri(self, GLib.filename_to_uri(log_dir, None), 0)
+
     def _on_sign_out(self, row):
         self._process_manager.stop()
         self._sharing_switch.set_active(False)
+        self._sharing_switch.set_state(False)
+        self._update_sharing_status(False)
         self._clear_credentials()
         self._email = None
         self._view_stack.set_visible_child_name("login")
