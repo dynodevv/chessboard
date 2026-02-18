@@ -1,0 +1,8 @@
+builddir/
+_build/
+*.pyc
+__pycache__/
+*.egg-info/
+.flatpak-builder/
+*.flatpak
+repo/

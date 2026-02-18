@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3584e4"/>
+      <stop offset="100%" stop-color="#1a73e8"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="16" fill="url(#bg)"/>
+  <!-- Pawn silhouette -->
+  <g transform="translate(64,64)" fill="#ffffff">
+    <circle cx="0" cy="-28" r="14"/>
+    <path d="M-10,-14 C-16,0 -20,16 -22,28 L22,28 C20,16 16,0 10,-14 Z"/>
+    <rect x="-26" y="28" width="52" height="8" rx="4"/>
+  </g>
+</svg>
