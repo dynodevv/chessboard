@@ -1,0 +1,25 @@
+# Build
+builddir/
+_build/
+build/
+
+# Flatpak
+.flatpak-builder/
+*.flatpak
+repo/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

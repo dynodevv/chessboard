@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="chessboard">
+  <schema id="org.dynodevv.chessboard" path="/org/dynodevv/chessboard/">
+    <key name="email" type="s">
+      <default>''</default>
+      <summary>Account email</summary>
+      <description>The email address used to log in to Pawns CLI.</description>
+    </key>
+    <key name="device-name" type="s">
+      <default>''</default>
+      <summary>Device name</summary>
+      <description>The device name reported to Pawns CLI.</description>
+    </key>
+    <key name="autostart-sharing" type="b">
+      <default>false</default>
+      <summary>Auto-start sharing</summary>
+      <description>Whether to automatically start Pawns CLI when Chessboard launches.</description>
+    </key>
+    <key name="autostart-app" type="b">
+      <default>false</default>
+      <summary>Auto-start Chessboard</summary>
+      <description>Whether to start Chessboard at system startup.</description>
+    </key>
+  </schema>
+</schemalist>
