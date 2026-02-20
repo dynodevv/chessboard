@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.dynodevv.chessboard</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Chessboard</name>
+  <summary>A premium Linux client for Pawns CLI</summary>
+  <description>
+    <p>
+      Chessboard is a modern GNOME application that provides a graphical
+      interface for managing the Pawns CLI tool. It features automatic
+      downloading, easy login, and background process management.
+    </p>
+    <p>
+      This project is not associated, nor endorsed by IPRoyal.
+    </p>
+  </description>
+  <developer id="org.dynodevv">
+    <name>Dyno</name>
+  </developer>
+  <url type="homepage">https://github.com/dynodevv/chessboard</url>
+  <url type="bugtracker">https://github.com/dynodevv/chessboard/issues</url>
+  <launchable type="desktop-id">org.dynodevv.chessboard.desktop</launchable>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="1.0.0" date="2026-02-20">
+      <description>
+        <p>Initial release of Chessboard.</p>
+      </description>
+    </release>
+  </releases>
+</component>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#62a0ea"/>
+      <stop offset="100%" stop-color="#1a5fb4"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="16" fill="url(#bg)"/>
+  <!-- Chess knight silhouette -->
+  <g transform="translate(28,16) scale(0.56)" fill="white">
+    <path d="M45 20 C30 20 20 35 20 55 C20 70 25 80 30 90 L25 140 L35 140 L40 100
+             C45 105 55 105 60 100 L65 140 L75 140 L70 90
+             C80 80 90 65 90 50 C90 30 75 20 65 20
+             C60 15 50 15 45 20 Z
+             M55 40 C60 40 65 45 65 50 C65 55 60 60 55 60
+             C50 60 45 55 45 50 C45 45 50 40 55 40 Z"/>
+  </g>
+</svg>

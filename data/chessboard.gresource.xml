@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/dynodevv/chessboard">
+    <file preprocess="xml-stripblanks">icons/hicolor/scalable/apps/org.dynodevv.chessboard.svg</file>
+    <file preprocess="xml-stripblanks">icons/hicolor/symbolic/apps/org.dynodevv.chessboard-symbolic.svg</file>
+  </gresource>
+</gresources>
