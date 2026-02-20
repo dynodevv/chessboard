@@ -183,7 +183,7 @@ class ChessboardWindow(Adw.ApplicationWindow):
         )
         account_icon = Gtk.Image.new_from_icon_name('avatar-default-symbolic')
         self._account_row.add_prefix(account_icon)
-        status_group.add(self._account_row)
+        account_group.add(self._account_row)
 
         logout_button = Gtk.Button(
             icon_name='system-log-out-symbolic',
@@ -241,13 +241,7 @@ class ChessboardWindow(Adw.ApplicationWindow):
         downloader.download_async(self._on_download_finished)
 
     def _on_download_complete(self):
-        saved_email = self._settings.get_string('email')
-        saved_device = self._settings.get_string('device-name')
-
-        if saved_email and saved_device:
-            self._show_login_page()
-        else:
-            self._show_login_page()
+        self._show_login_page()
 
     def _show_login_page(self):
         self._view_stack.set_visible_child_name('login')
